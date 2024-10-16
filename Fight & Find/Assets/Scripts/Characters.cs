@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Characters : MonoBehaviour
@@ -13,8 +15,13 @@ public class Characters : MonoBehaviour
     [SerializeField] protected float cursorRadius;
     [SerializeField] protected float cursorCorrector;
     [SerializeField] protected float health;
+    [SerializeField] protected float invincibilityTime;
+    protected float invincibilityCurrent;
     protected float currentHealth;
     protected float angle;
+
+    Color transparent = new Color(255, 255, 255, 0);
+    Color canSee = new Color(255, 255, 255, 255);
 
     protected virtual void Start()
     {
@@ -22,6 +29,7 @@ public class Characters : MonoBehaviour
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        
     }
 
     protected virtual void Update()
@@ -30,10 +38,15 @@ public class Characters : MonoBehaviour
         if (currentState != state)
         {
             currentState = state;
-            animator.CrossFade(state, 0.2f,0);
+            animator.CrossFade(state, 0.2f, 0);
         }
         RotateCursorAroundPlayer();
         FlipCharacter();
+
+        if (invincibilityCurrent >= 0) {
+            invincibilityCurrent -= Time.deltaTime;
+
+        }
     }
 
     protected virtual void FlipCharacter()
@@ -54,7 +67,7 @@ public class Characters : MonoBehaviour
 
     protected virtual string GetState()
     {
-        if(Time.time < lockTill) 
+        if (Time.time < lockTill)
             return currentState;
 
         if (Mathf.Abs(Input.GetAxisRaw("Horizontal")) != 0 || Mathf.Abs(Input.GetAxisRaw("Vertical")) != 0)
@@ -69,5 +82,77 @@ public class Characters : MonoBehaviour
             lockTill = Time.time + t;
             return anim;
         }
+    }
+
+    protected virtual void CharGetDamage(float damage)
+    {
+
+        currentHealth -= damage;
+        Debug.Log(currentHealth);
+        StartCoroutine(Blinking());
+        if (currentHealth <= 0)
+        {
+
+            Debug.Log("Man is Dead");
+
+        }
+
+
+    }
+
+    protected void OnCollisionEnter2D(Collision2D coll)
+    {
+        if (invincibilityCurrent <= 0)
+        {
+
+            coll.gameObject.TryGetComponent(out Enemy enemy);
+
+            invincibilityCurrent = invincibilityTime;
+
+            CharGetDamage(enemy.damage);
+
+            invincibilityCurrent = invincibilityTime;
+
+            
+        }
+        else { Debug.Log(invincibilityCurrent); }
+
+
+
+    }
+
+    IEnumerator Blinking()
+    {
+        bool flag = true;
+        while (true)
+        {
+            
+            if (invincibilityCurrent > 0)
+            {
+                yield return new WaitForSeconds(invincibilityCurrent / 10);
+                if (!flag)
+                {
+
+                    spriteRenderer.color = transparent;
+                    Debug.Log("0");
+                    flag = true;
+                }
+                else
+                {
+                    spriteRenderer.color = canSee;
+                    Debug.Log("1");
+                    flag = false;
+                }
+
+            }
+            else
+            {
+                spriteRenderer.color = canSee;
+                break;
+            }
+        }
+
+
+
     }
 }

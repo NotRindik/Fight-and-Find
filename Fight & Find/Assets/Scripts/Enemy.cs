@@ -7,6 +7,7 @@ public class Enemy : MonoBehaviour
 {
     [SerializeField] private float health;
     [SerializeField] private float speed;
+    [SerializeField] public float damage;
     private float currentHealth;
     private Characters character;
     private Rigidbody2D Rigidbody2D;
@@ -27,6 +28,8 @@ public class Enemy : MonoBehaviour
         if (currentHealth < 0)
         {
             Debug.Log("DIE");
+            
+            
 
             Destroy(gameObject);
         }
