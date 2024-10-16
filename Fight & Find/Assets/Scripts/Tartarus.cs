@@ -4,20 +4,4 @@ using UnityEngine;
 
 public class Tartarus : Enemy
 {
-
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-
-
-
-    }
 }

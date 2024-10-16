@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Characters : MonoBehaviour
 {
@@ -19,13 +20,13 @@ public class Characters : MonoBehaviour
     protected float invincibilityCurrent;
     protected float currentHealth;
     protected float angle;
-
-    Color transparent = new Color(255, 255, 255, 0);
-    Color canSee = new Color(255, 255, 255, 255);
+    public Slider healthSlider;
 
     protected virtual void Start()
     {
         currentHealth = health;
+        healthSlider.maxValue = health; 
+        healthSlider.value = health; 
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -45,7 +46,6 @@ public class Characters : MonoBehaviour
 
         if (invincibilityCurrent >= 0) {
             invincibilityCurrent -= Time.deltaTime;
-
         }
     }
 
@@ -88,6 +88,7 @@ public class Characters : MonoBehaviour
     {
 
         currentHealth -= damage;
+        healthSlider.value = currentHealth;
         Debug.Log(currentHealth);
         StartCoroutine(Blinking());
         if (currentHealth <= 0)
@@ -105,19 +106,13 @@ public class Characters : MonoBehaviour
         if (invincibilityCurrent <= 0)
         {
 
-            coll.gameObject.TryGetComponent(out Enemy enemy);
+            if (coll.gameObject.TryGetComponent(out Enemy enemy))
+            {
+                invincibilityCurrent = invincibilityTime;
 
-            invincibilityCurrent = invincibilityTime;
-
-            CharGetDamage(enemy.damage);
-
-            invincibilityCurrent = invincibilityTime;
-
-            
+                CharGetDamage(enemy.damage);
+            }
         }
-        else { Debug.Log(invincibilityCurrent); }
-
-
 
     }
 
@@ -132,22 +127,18 @@ public class Characters : MonoBehaviour
                 yield return new WaitForSeconds(invincibilityCurrent / 10);
                 if (!flag)
                 {
-
-                    spriteRenderer.color = transparent;
-                    Debug.Log("0");
-                    flag = true;
+                    spriteRenderer.color = new Color(spriteRenderer.color.r, spriteRenderer.color.g, spriteRenderer.color.b,0.2f);
                 }
                 else
                 {
-                    spriteRenderer.color = canSee;
-                    Debug.Log("1");
-                    flag = false;
+                    spriteRenderer.color = new Color(spriteRenderer.color.r, spriteRenderer.color.g, spriteRenderer.color.b, 1);
                 }
+                 flag = !flag;
 
             }
             else
             {
-                spriteRenderer.color = canSee;
+                spriteRenderer.color = new Color(spriteRenderer.color.r, spriteRenderer.color.g, spriteRenderer.color.b, 1);
                 break;
             }
         }
